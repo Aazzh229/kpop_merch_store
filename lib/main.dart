@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'pages/landing_page.dart';
 
 void main() {
-  runApp(const KpopMerchApp());
+  runApp(const KStoreApp());
 }
 
-class KpopMerchApp extends StatelessWidget {
-  const KpopMerchApp({Key? key}) : super(key: key);
+class KStoreApp extends StatelessWidget {
+  const KStoreApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kpop Merch Store',
+      title: 'K-STORE',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.pink,
         fontFamily: 'Helvetica',
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const HomePage(),
+      home: const LandingPage(),
     );
   }
 }

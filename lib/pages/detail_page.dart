@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../widgets/cart_drawer.dart';
 import '../widgets/search_drawer.dart';
-
+import 'checkout_page.dart';
 class ProductDetailPage extends StatefulWidget {
   final Product product;
   const ProductDetailPage({Key? key, required this.product}) : super(key: key);
@@ -13,11 +13,13 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int quantity = 1;
+  String? _selectedVariant;
+  final GlobalKey<ScaffoldState> _detailScaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _detailScaffoldKey = GlobalKey<ScaffoldState>();
     bool isDesktop = MediaQuery.of(context).size.width > 800;
+
 
     return Scaffold(
       key: _detailScaffoldKey,
@@ -27,7 +29,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         backgroundColor: Colors.pink,
         elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-        title: const Text('KPOPMERCH', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2)),
+        title: const Text('K-STORE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -127,6 +129,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             Text(widget.product.price, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.pink)),
             const SizedBox(width: 10),
             Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.pink, borderRadius: BorderRadius.circular(3)), child: const Text("SALE", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+            if (widget.product.isBestSeller) ...[
+              const SizedBox(width: 8),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(3)), child: const Text("BEST SELLER", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+            ],
           ],
         ),
         const SizedBox(height: 10),
@@ -149,19 +155,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
         const Text("Option:", style: TextStyle(color: Colors.grey, fontSize: 13)),
         const SizedBox(height: 5),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(4)),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: "1 RANDOM",
-              isExpanded: true,
-              items: ["1 RANDOM"].map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14)))).toList(),
-              onChanged: (v) {},
+        if (widget.product.variants.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(4)),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedVariant ?? widget.product.variants.first,
+                isExpanded: true,
+                items: widget.product.variants.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14)))).toList(),
+                onChanged: (v) {
+                  setState(() {
+                    _selectedVariant = v;
+                  });
+                },
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 20),
 
         const Text("Quantity:", style: TextStyle(color: Colors.grey, fontSize: 13)),
@@ -182,15 +193,34 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
         SizedBox(
           width: double.infinity, height: 55,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)), elevation: 0),
-            onPressed: () {
-              for (int i = 0; i < quantity; i++) {
-                cartProvider.addToCart(widget.product);
-              }
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.product.name} added!'), backgroundColor: Colors.pink));
-            },
-            child: const Text("ADD TO CART", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)), elevation: 0),
+                  onPressed: () {
+                    for (int i = 0; i < quantity; i++) {
+                      cartProvider.addToCart(widget.product);
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.product.name} added!'), backgroundColor: Colors.pink));
+                  },
+                  child: const Text("ADD TO CART", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)), elevation: 0),
+                  onPressed: () {
+                    for (int i = 0; i < quantity; i++) {
+                      cartProvider.addToCart(widget.product);
+                    }
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutPage()));
+                  },
+                  child: const Text("BUY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+                ),
+              ),
+            ],
           ),
         ),
       ],

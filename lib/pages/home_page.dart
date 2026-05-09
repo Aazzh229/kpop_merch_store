@@ -5,6 +5,13 @@ import '../widgets/group_section.dart';
 import '../widgets/product_card.dart';
 import '../widgets/cart_drawer.dart';
 import '../widgets/search_drawer.dart';
+import 'category_page.dart';
+import 'group_page.dart';
+import 'new_arrivals_page.dart';
+import 'best_sellers_page.dart';
+import 'profile_page.dart';
+import 'claim_voucher_page.dart';
+import 'gift_card_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -34,7 +41,7 @@ class _HomePageState extends State<HomePage> {
                   SliverAppBar(
                     backgroundColor: Colors.white,
                     automaticallyImplyLeading: false,
-                    title: const Text('Kpop Merch Store', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 24)),
+                    title: Image.asset('lib/assets/kstore-header-pop.png', height: 40),
                     floating: true,
                     pinned: true,
                     elevation: 0,
@@ -71,12 +78,50 @@ class _HomePageState extends State<HomePage> {
                           );
                         }
                       ),
+                      IconButton(
+                        icon: const Icon(Icons.person_outline, color: Colors.black87),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
+                        },
+                      ),
                       const SizedBox(width: 10),
                     ],
                   ),
                   SliverToBoxAdapter(
                     child: Column(
-                      children: const [BannerSlider(), CategoryMenu()],
+                      children: [
+                        const BannerSlider(),
+                        const CategoryMenu(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: InkWell(
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClaimVoucherPage())),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(colors: [Colors.pink[400]!, Colors.orange[400]!]),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.confirmation_number, color: Colors.white),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: const [
+                                        Text('Klaim Voucher Belanja!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                        Text('Dapatkan diskon dan gratis ongkir sekarang', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SliverPersistentHeader(
@@ -108,22 +153,22 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 40),
       children: [
-        ...groupList.map((group) {
+        ...groupList.where((g) => g != 'GIFT CARD').map((group) {
           final products = tabProducts.where((p) => p.groupName == group).toList();
           return GroupSection(groupName: group, products: products);
-        }).toList(),
+        }),
         
         const Padding(
           padding: EdgeInsets.only(top: 40, bottom: 20, left: 16),
           child: Text('More to explore for you!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 220, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.65,
+              maxCrossAxisExtent: 220, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.58,
             ),
             itemCount: _productsToShow < tabProducts.length ? _productsToShow : tabProducts.length,
             itemBuilder: (context, index) => ProductCard(product: tabProducts[index]),
@@ -160,13 +205,33 @@ class CategoryMenu extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
-          children: ['Categories', 'Brands', 'New Arrivals', 'Best Sellers', 'Gift Card'].map((menu) => Padding(
+          children: ['Categories', 'Groups', 'New Arrivals', 'Best Sellers', 'Gift Card'].map((menu) => Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: Chip(
+            child: ActionChip(
               label: Text(menu),
               backgroundColor: Colors.white,
               side: BorderSide(color: Colors.grey[200]!),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              onPressed: () {
+                if (menu == 'Categories') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPage()));
+                } else if (menu == 'Groups') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const GroupPage()));
+                } else if (menu == 'New Arrivals') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const NewArrivalsPage()));
+                } else if (menu == 'Best Sellers') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const BestSellersPage()));
+                } else if (menu == 'Gift Card') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const GiftCardPage()));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$menu coming soon!'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                }
+              },
             ),
           )).toList(),
         ),
